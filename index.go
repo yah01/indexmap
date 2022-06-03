@@ -29,6 +29,12 @@ func (index *PrimaryIndex[K, V]) remove(key K) {
 	delete(index.inner, key)
 }
 
+func (index *PrimaryIndex[K, V]) iterate(handler func(key K, value *V)) {
+	for key, value := range index.inner {
+		handler(key, value)
+	}
+}
+
 type SecondaryIndex[V any] struct {
 	extractField func(value *V) []any
 

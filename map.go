@@ -15,6 +15,10 @@ func NewIndexMap[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMa
 
 func (armap *IndexMap[K, V]) AddIndex(indexName string, index *SecondaryIndex[V]) {
 	armap.indexes[indexName] = index
+
+	armap.primaryIndex.iterate(func(_ K, value *V) {
+		index.insert(value)
+	})
 }
 
 func (armap *IndexMap[K, V]) Get(key K) *V {
