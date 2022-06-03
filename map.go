@@ -63,6 +63,8 @@ func (armap *IndexMap[K, V]) Remove(key K) {
 		return
 	}
 
+	armap.primaryIndex.remove(key)
+
 	for _, index := range armap.indexes {
 		index.remove(elem)
 	}
