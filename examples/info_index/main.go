@@ -39,5 +39,4 @@ func main() {
 	fmt.Printf("%+v\n", persons.GetBy("name", ashe.Name))
 	fmt.Printf("%+v\n", persons.Get(bob.ID))
 	fmt.Printf("%+v\n", persons.GetBy("name", bob.Name))
-
 }
