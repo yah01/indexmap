@@ -1,9 +1,5 @@
 package indexmap
 
-import (
-	"fmt"
-)
-
 // V must be a sturct pointer
 type IndexMap[K comparable, V any] struct {
 	primaryIndex *PrimaryIndex[K, V]
@@ -30,7 +26,7 @@ func (armap *IndexMap[K, V]) Get(key K) *V {
 func (armap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
 	index, ok := armap.indexes[indexName]
 	if !ok {
-		panic(fmt.Sprintf("no index for field %s", indexName))
+		return nil
 	}
 
 	elems := index.get(key)
@@ -44,7 +40,7 @@ func (armap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
 func (armap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
 	index, ok := armap.indexes[indexName]
 	if !ok {
-		panic(fmt.Sprintf("no index for field %s", indexName))
+		return nil
 	}
 
 	return index.get(key)
