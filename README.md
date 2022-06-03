@@ -10,14 +10,14 @@ type Person struct {
 	Age  int
 }
 
-persons := indexmap.NewArindex(indexmap.NewPrimaryIndex(func(value *Person) int64 {
+persons := indexmap.NewIndexMap(indexmap.NewPrimaryIndex(func(value *Person) int64 {
     return value.ID
 }))
 ```
 
 Now it's just like the common map type, but then you can add more indexes to seek person with name:
 ```golang
-persons.AddIndex("name", indexmap.NewIndex(func(value *Person) []any {
+persons.AddIndex("name", indexmap.NewSecondaryIndex(func(value *Person) []any {
     return []any{value.Name}
 }))
 ```
