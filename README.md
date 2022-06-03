@@ -21,6 +21,7 @@ persons.AddIndex("name", indexmap.NewIndex(func(value *Person) []any {
     return []any{value.Name}
 }))
 ```
+You have to provide the way to extract keys for the inserted object, all keys must be comparable.
 
 You can only insert data after creating all indexes:
 ```golang
@@ -56,3 +57,14 @@ which outputs:
 
 ## One-To-Many/Many-To-Many Index
 It's OK to create an index that's not one-to-one, The `GetBy()` method returns one of the object if many ones exist, `GetAllBy()` return a slice with all matched objects. For the example of many-to-many index, refer [contain_index_example](./examples/contain_index/main.go)
+
+## Performance
+Let $m$ be the number of indexes:
+| Operation | Complexity |
+| --------- | ---------- |
+| Get       | $O(1)$     |
+| GetBy     | $O(1)$     |
+| Insert    | $O(m)$     |
+| Remove    | $O(m)$     |
+
+The more indexes, the slower the write operations.
