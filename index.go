@@ -29,20 +29,20 @@ func (index *PrimaryIndex[K, V]) remove(key K) {
 	delete(index.inner, key)
 }
 
-type Index[V any] struct {
+type SecondaryIndex[V any] struct {
 	extractField func(value *V) []any
 
 	inner map[any]container.Set[*V]
 }
 
-func NewIndex[V any](extractField func(value *V) []any) *Index[V] {
-	return &Index[V]{
+func NewSecondaryIndex[V any](extractField func(value *V) []any) *SecondaryIndex[V] {
+	return &SecondaryIndex[V]{
 		extractField: extractField,
 		inner:        make(map[any]container.Set[*V]),
 	}
 }
 
-func (index *Index[V]) get(key any) []*V {
+func (index *SecondaryIndex[V]) get(key any) []*V {
 	elems, ok := index.inner[key]
 	if !ok {
 		return nil
@@ -51,7 +51,7 @@ func (index *Index[V]) get(key any) []*V {
 	return elems.Collect()
 }
 
-func (index *Index[V]) insert(elem *V) {
+func (index *SecondaryIndex[V]) insert(elem *V) {
 	keys := index.extractField(elem)
 	for i := range keys {
 		elems, ok := index.inner[keys[i]]
@@ -64,7 +64,7 @@ func (index *Index[V]) insert(elem *V) {
 	}
 }
 
-func (index *Index[V]) remove(elem *V) {
+func (index *SecondaryIndex[V]) remove(elem *V) {
 	keys := index.extractField(elem)
 	for i := range keys {
 		elems, ok := index.inner[keys[i]]

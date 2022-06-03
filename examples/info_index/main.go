@@ -13,11 +13,11 @@ type Person struct {
 }
 
 func main() {
-	persons := indexmap.NewArindex(indexmap.NewPrimaryIndex(func(value *Person) int64 {
+	persons := indexmap.NewIndexMap(indexmap.NewPrimaryIndex(func(value *Person) int64 {
 		return value.ID
 	}))
 
-	persons.AddIndex("name", indexmap.NewIndex(func(value *Person) []any {
+	persons.AddIndex("name", indexmap.NewSecondaryIndex(func(value *Person) []any {
 		return []any{value.Name}
 	}))
 

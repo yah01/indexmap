@@ -16,10 +16,10 @@ const (
 )
 
 func main() {
-	replicas := indexmap.NewArindex(indexmap.NewPrimaryIndex(func(value *Replica) int64 {
+	replicas := indexmap.NewIndexMap(indexmap.NewPrimaryIndex(func(value *Replica) int64 {
 		return value.ID
 	}))
-	replicas.AddIndex(NodeContainIndex, indexmap.NewIndex(func(value *Replica) []any {
+	replicas.AddIndex(NodeContainIndex, indexmap.NewSecondaryIndex(func(value *Replica) []any {
 		keys := make([]any, 0, len(value.Nodes))
 		for _, node := range value.Nodes {
 			keys = append(keys, node)

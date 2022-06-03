@@ -7,17 +7,17 @@ import (
 // V must be a sturct pointer
 type IndexMap[K comparable, V any] struct {
 	primaryIndex *PrimaryIndex[K, V]
-	indexes      map[string]*Index[V]
+	indexes      map[string]*SecondaryIndex[V]
 }
 
-func NewArindex[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMap[K, V] {
+func NewIndexMap[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMap[K, V] {
 	return &IndexMap[K, V]{
 		primaryIndex: primaryIndex,
-		indexes:      make(map[string]*Index[V]),
+		indexes:      make(map[string]*SecondaryIndex[V]),
 	}
 }
 
-func (armap *IndexMap[K, V]) AddIndex(indexName string, index *Index[V]) {
+func (armap *IndexMap[K, V]) AddIndex(indexName string, index *SecondaryIndex[V]) {
 	armap.indexes[indexName] = index
 }
 
