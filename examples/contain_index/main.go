@@ -63,3 +63,20 @@ func main() {
 		fmt.Println()
 	}
 }
+
+/*
+Outputs:
+&{ID:1 Nodes:[1 2 3]}
+&{ID:2 Nodes:[2 3 4]}
+&{ID:1 Nodes:[1 2 3]}
+&{ID:1 Nodes:[1 2 3]}&{ID:2 Nodes:[2 3 4]}
+&{ID:1 Nodes:[1 2 3]}&{ID:2 Nodes:[2 3 4]}&{ID:3 Nodes:[3 4 5]}
+&{ID:2 Nodes:[2 3 4]}&{ID:3 Nodes:[3 4 5]}
+&{ID:3 Nodes:[3 4 5]}
+remove bob
+&{ID:1 Nodes:[1 2 3]}
+&{ID:1 Nodes:[1 2 3]}
+&{ID:3 Nodes:[3 4 5]}&{ID:1 Nodes:[1 2 3]}
+&{ID:3 Nodes:[3 4 5]}
+&{ID:3 Nodes:[3 4 5]}
+*/

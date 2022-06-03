@@ -40,3 +40,11 @@ func main() {
 	fmt.Printf("%+v\n", persons.Get(bob.ID))
 	fmt.Printf("%+v\n", persons.GetBy("name", bob.Name))
 }
+
+/*
+Outputs:
+&{ID:1 Name:Ashe Age:39}
+&{ID:1 Name:Ashe Age:39}
+&{ID:2 Name:Bob Age:18}
+&{ID:2 Name:Bob Age:18}
+*/
