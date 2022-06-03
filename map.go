@@ -50,22 +50,27 @@ func (armap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
 	return index.get(key)
 }
 
-func (armap *IndexMap[K, V]) Insert(value *V) {
-	armap.primaryIndex.insert(value)
-	for _, index := range armap.indexes {
-		index.insert(value)
+func (armap *IndexMap[K, V]) Insert(values ...*V) {
+	for i := range values {
+		armap.primaryIndex.insert(values[i])
+		for _, index := range armap.indexes {
+			index.insert(values[i])
+		}
 	}
+
 }
 
-func (armap *IndexMap[K, V]) Remove(key K) {
-	elem := armap.primaryIndex.get(key)
-	if elem == nil {
-		return
-	}
+func (armap *IndexMap[K, V]) Remove(keys ...K) {
+	for i := range keys {
+		elem := armap.primaryIndex.get(keys[i])
+		if elem == nil {
+			continue
+		}
 
-	armap.primaryIndex.remove(key)
+		armap.primaryIndex.remove(keys[i])
 
-	for _, index := range armap.indexes {
-		index.remove(elem)
+		for _, index := range armap.indexes {
+			index.remove(elem)
+		}
 	}
 }
