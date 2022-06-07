@@ -55,7 +55,10 @@ which outputs:
 &{ID:2 Name:Bob Age:18}
 ```
 
-## One-To-Many/Many-To-Many Index
+## Document
+[Reference](https://pkg.go.dev/github.com/yah01/indexmap)
+
+### One-To-Many/Many-To-Many Index
 It's OK to create an index that's not one-to-one, The `GetBy()` method returns one of the object if many ones exist, `GetAllBy()` return a slice with all matched objects. For the example of many-to-many index, refer [contain_index_example](./examples/contain_index/main.go)
 
 ## Performance
