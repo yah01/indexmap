@@ -69,7 +69,8 @@ func (imap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
 }
 
 // Insert values into the map,
-// also updates the indexes added.
+// also updates the indexes added,
+// overwrite if a value with the same primary key existed
 func (imap *IndexMap[K, V]) Insert(values ...*V) {
 	for i := range values {
 		imap.primaryIndex.insert(values[i])
@@ -95,4 +96,34 @@ func (imap *IndexMap[K, V]) Remove(keys ...K) {
 			index.remove(elem)
 		}
 	}
+}
+
+// Iterate all the elements,
+// stop iteration if fn returns false,
+// no any guarantee to the order.
+func (imap *IndexMap[K, V]) Range(fn func(key K, value *V) bool) {
+	for k, v := range imap.primaryIndex.inner {
+		if !fn(k, v) {
+			return
+		}
+	}
+}
+
+// Return all the keys and values.
+func (imap *IndexMap[K, V]) Collect() ([]K, []*V) {
+	var (
+		keys   = make([]K, 0, imap.Len())
+		values = make([]*V, 0, imap.Len())
+	)
+	for k, v := range imap.primaryIndex.inner {
+		keys = append(keys, k)
+		values = append(values, v)
+	}
+
+	return keys, values
+}
+
+// The number of elements.
+func (imap *IndexMap[K, V]) Len() int {
+	return len(imap.primaryIndex.inner)
 }
