@@ -1,6 +1,8 @@
 package indexmap
 
 // IndexMap is a map supports seeking data with more indexes.
+// Serializing a IndexMap as JSON results in the same as serializing a map,
+// the result doesn't contain the index information, only data.
 type IndexMap[K comparable, V any] struct {
 	primaryIndex *PrimaryIndex[K, V]
 	indexes      map[string]*SecondaryIndex[V]
