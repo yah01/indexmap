@@ -1,15 +1,18 @@
 package indexmap
 
+import "github.com/yah01/container"
+
 // IndexMap is a map supports seeking data with more indexes.
 // Serializing a IndexMap as JSON results in the same as serializing a map,
 // the result doesn't contain the index information, only data.
+// NOTE: DO NOT insert nil value into the IndexMap
 type IndexMap[K comparable, V any] struct {
 	primaryIndex *PrimaryIndex[K, V]
 	indexes      map[string]*SecondaryIndex[V]
 }
 
 // Create a IndexMap with a primary index,
-// the primary index must be one-to-one.
+// the primary index must be a one-to-one mapping.
 func NewIndexMap[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMap[K, V] {
 	return &IndexMap[K, V]{
 		primaryIndex: primaryIndex,
@@ -54,31 +57,87 @@ func (imap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
 		return nil
 	}
 
-	return elems[0]
+	for value := range elems {
+		return value
+	}
+
+	return nil
 }
 
 // Return all values the seeked by the key,
 // nil if index or key not exists.
 func (imap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
-	index, ok := imap.indexes[indexName]
-	if !ok {
+	values := imap.getAllBy(indexName, key)
+	if values == nil {
 		return nil
 	}
 
-	return index.get(key)
+	return values.Collect()
+}
+
+// Return true if the value with given key exists,
+// false otherwise.
+func (imap *IndexMap[K, V]) Contain(key K) bool {
+	return imap.Get(key) != nil
 }
 
 // Insert values into the map,
 // also updates the indexes added,
-// overwrite if a value with the same primary key existed
+// overwrite if a value with the same primary key existed.
+// NOTE: insert an modified existed value with the same address may confuse the index, use Update() to do this.
 func (imap *IndexMap[K, V]) Insert(values ...*V) {
 	for i := range values {
+		old := imap.Get(imap.primaryIndex.extractField(values[i]))
 		imap.primaryIndex.insert(values[i])
 		for _, index := range imap.indexes {
+			if old != nil {
+				index.remove(old)
+			}
+
 			index.insert(values[i])
 		}
 	}
+}
 
+// An UpdateFn modifies the given value,
+// and returns the modified value, they could be the same object,
+// true if the object is modified,
+// false otherwise
+type UpdateFn[V any] func(value *V) (*V, bool)
+
+// Update the value for the given key,
+// it removes the old one if exists, and inserts updateFn(old) if modified and not nil.
+func (imap *IndexMap[K, V]) Update(key K, updateFn UpdateFn[V]) {
+	old := imap.Get(key)
+	if old != nil {
+		imap.Remove(key)
+	}
+
+	new, modified := updateFn(old)
+	if modified && new != nil {
+		imap.Insert(new)
+	}
+}
+
+// Update the values for the given index and key,
+// it removes the old ones if exist, and inserts updateFn(old) for every old ones if not nil.
+// NOTE: the modified values have to be with unique primary key
+func (imap *IndexMap[K, V]) UpdateBy(indexName string, key any, updateFn UpdateFn[V]) {
+	oldValues := imap.getAllBy(indexName, key)
+	if len(oldValues) == 0 {
+		return
+	}
+
+	imap.removeValueSet(oldValues)
+
+	for old := range oldValues {
+		imap.Remove(imap.primaryIndex.extractField(old))
+
+		new, modified := updateFn(old)
+		if modified && new != nil {
+			imap.Insert(new)
+		}
+	}
 }
 
 // Remove values into the map,
@@ -95,6 +154,19 @@ func (imap *IndexMap[K, V]) Remove(keys ...K) {
 		for _, index := range imap.indexes {
 			index.remove(elem)
 		}
+	}
+}
+
+// Remove values into the map,
+// also updates the indexes added.
+func (imap *IndexMap[K, V]) RemoveBy(indexName string, keys ...any) {
+	for i := range keys {
+		values := imap.getAllBy(indexName, keys[i])
+		if values == nil {
+			continue
+		}
+
+		imap.removeValueSet(values)
 	}
 }
 
@@ -126,4 +198,27 @@ func (imap *IndexMap[K, V]) Collect() ([]K, []*V) {
 // The number of elements.
 func (imap *IndexMap[K, V]) Len() int {
 	return len(imap.primaryIndex.inner)
+}
+
+func (imap *IndexMap[K, V]) getAllBy(indexName string, key any) container.Set[*V] {
+	index, ok := imap.indexes[indexName]
+	if !ok {
+		return nil
+	}
+
+	return index.get(key)
+}
+
+// All values must exists
+func (imap *IndexMap[K, V]) removeValues(values ...*V) {
+	for i := range values {
+		imap.Remove(imap.primaryIndex.extractField(values[i]))
+	}
+}
+
+// All values must exists
+func (imap *IndexMap[K, V]) removeValueSet(values container.Set[*V]) {
+	for value := range values {
+		imap.Remove(imap.primaryIndex.extractField(value))
+	}
 }

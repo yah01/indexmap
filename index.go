@@ -53,13 +53,13 @@ func NewSecondaryIndex[V any](extractField func(value *V) []any) *SecondaryIndex
 	}
 }
 
-func (index *SecondaryIndex[V]) get(key any) []*V {
-	elems, ok := index.inner[key]
+func (index *SecondaryIndex[V]) get(key any) container.Set[*V] {
+	set, ok := index.inner[key]
 	if !ok {
 		return nil
 	}
 
-	return elems.Collect()
+	return set
 }
 
 func (index *SecondaryIndex[V]) insert(elem *V) {
