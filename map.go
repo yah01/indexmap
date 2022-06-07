@@ -1,11 +1,13 @@
 package indexmap
 
-// V must be a sturct pointer
+// IndexMap is a map supports seeking data with more indexes.
 type IndexMap[K comparable, V any] struct {
 	primaryIndex *PrimaryIndex[K, V]
 	indexes      map[string]*SecondaryIndex[V]
 }
 
+// Create a IndexMap with a primary index,
+// the primary index must be one-to-one.
 func NewIndexMap[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMap[K, V] {
 	return &IndexMap[K, V]{
 		primaryIndex: primaryIndex,
@@ -13,22 +15,34 @@ func NewIndexMap[K comparable, V any](primaryIndex *PrimaryIndex[K, V]) *IndexMa
 	}
 }
 
-func (armap *IndexMap[K, V]) AddIndex(indexName string, index *SecondaryIndex[V]) {
-	armap.indexes[indexName] = index
+// Add a secondary index,
+// build index for the data inserted,
+// the return value indicates whether succeed to add index,
+// false if the indexName existed.
+func (imap *IndexMap[K, V]) AddIndex(indexName string, index *SecondaryIndex[V]) bool {
+	if _, ok := imap.indexes[indexName]; ok {
+		return false
+	}
 
-	armap.primaryIndex.iterate(func(_ K, value *V) {
+	imap.indexes[indexName] = index
+
+	imap.primaryIndex.iterate(func(_ K, value *V) {
 		index.insert(value)
 	})
+
+	return true
 }
 
-func (armap *IndexMap[K, V]) Get(key K) *V {
-	return armap.primaryIndex.get(key)
+// Get value by the primary key,
+// nil if key not exists.
+func (imap *IndexMap[K, V]) Get(key K) *V {
+	return imap.primaryIndex.get(key)
 }
 
-// Return one of the elements for the given secondary key,
-// No guarantee for which one is returned if more than one elements indexed by the key
-func (armap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
-	index, ok := armap.indexes[indexName]
+// Return one of the values for the given secondary key,
+// No guarantee for which one is returned if more than one elements indexed by the key.
+func (imap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
+	index, ok := imap.indexes[indexName]
 	if !ok {
 		return nil
 	}
@@ -41,8 +55,10 @@ func (armap *IndexMap[K, V]) GetBy(indexName string, key any) *V {
 	return elems[0]
 }
 
-func (armap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
-	index, ok := armap.indexes[indexName]
+// Return all values the seeked by the key,
+// nil if index or key not exists.
+func (imap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
+	index, ok := imap.indexes[indexName]
 	if !ok {
 		return nil
 	}
@@ -50,26 +66,30 @@ func (armap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
 	return index.get(key)
 }
 
-func (armap *IndexMap[K, V]) Insert(values ...*V) {
+// Insert values into the map,
+// also updates the indexes added.
+func (imap *IndexMap[K, V]) Insert(values ...*V) {
 	for i := range values {
-		armap.primaryIndex.insert(values[i])
-		for _, index := range armap.indexes {
+		imap.primaryIndex.insert(values[i])
+		for _, index := range imap.indexes {
 			index.insert(values[i])
 		}
 	}
 
 }
 
-func (armap *IndexMap[K, V]) Remove(keys ...K) {
+// Remove values into the map,
+// also updates the indexes added.
+func (imap *IndexMap[K, V]) Remove(keys ...K) {
 	for i := range keys {
-		elem := armap.primaryIndex.get(keys[i])
+		elem := imap.primaryIndex.get(keys[i])
 		if elem == nil {
 			continue
 		}
 
-		armap.primaryIndex.remove(keys[i])
+		imap.primaryIndex.remove(keys[i])
 
-		for _, index := range armap.indexes {
+		for _, index := range imap.indexes {
 			index.remove(elem)
 		}
 	}

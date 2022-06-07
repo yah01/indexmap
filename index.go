@@ -10,6 +10,8 @@ type PrimaryIndex[K comparable, V any] struct {
 	inner map[K]*V
 }
 
+// Create an primary index,
+// the extractField func must guarantee it makes the index one-to-one.
 func NewPrimaryIndex[K comparable, V any](extractField func(value *V) K) *PrimaryIndex[K, V] {
 	return &PrimaryIndex[K, V]{
 		extractField: extractField,
@@ -41,6 +43,9 @@ type SecondaryIndex[V any] struct {
 	inner map[any]container.Set[*V]
 }
 
+// Create a secondary index,
+// the extractField func returns the keys for seeking the value,
+// It's OK that the same key seeks more than one values.
 func NewSecondaryIndex[V any](extractField func(value *V) []any) *SecondaryIndex[V] {
 	return &SecondaryIndex[V]{
 		extractField: extractField,
