@@ -107,7 +107,7 @@ Search persons like Bob
 ### Update Value
 Inserting the different values with the same key works like the normal map type, the last one overwrites the others, but for a inserted value, modifing it outside may confuse the index, modify an internal value with `Update()/UpdateBy()`:
 ```golang
-DO NOT:
+// DO NOT:
 person := persons.GetBy("name", "Ashe")
 person.City = "Shanghai"
 persons.Insert(person)
@@ -121,9 +121,6 @@ persons.UpdateBy("name", "Ashe", func(value *Person) (*Person, bool) {
     return value, true
 })
 ```
-
-### One-To-Many/Many-To-Many Index
-It's OK to create an index that's not one-to-one, The `GetBy()` method returns one of the object if many ones exist, `GetAllBy()` return a slice with all matched objects. For the example of many-to-many index, refer [contain_index_example](./examples/contain_index/main.go)
 
 ## Performance
 Let $n$ be the number of elements inserted, $m$ be the number of indexes:
