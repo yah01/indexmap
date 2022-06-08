@@ -98,7 +98,7 @@ for _, person := range persons.GetAllBy("like", "Bob") {
 ```
 
 which outputs:
-```
+```golang
 Search with ID or Name:
 &{ID:1 Name:Ashe Age:39 City:San Francisco Like:[Bob Cassidy]}
 &{ID:1 Name:Ashe Age:39 City:San Francisco Like:[Bob Cassidy]}
@@ -113,7 +113,7 @@ Search persons like Bob
 ```
 
 ## Document
-[Reference](https://pkg.go.dev/github.com/yah01/indexmap)
+[API Reference](https://pkg.go.dev/github.com/yah01/indexmap)
 
 ### Update Value
 Inserting the different values with the same key works like the normal map type, the last one overwrites the others, but for a inserted value, modifing it outside may confuse the index, modify an internal value with `Update()/UpdateBy()`:
@@ -131,6 +131,35 @@ persons.UpdateBy("name", "Ashe", func(value *Person) (*Person, bool) {
     value.City = "Shanghai"
     return value, true
 })
+```
+
+### Serialize & Deserialize
+You can serialize an IndexMap to JSON, the result is the same as serializing a normal map type, doesn't contain the index information, so you can't recover the indexes from that:
+```golang
+// Serialize
+imapData, err := json.Marshal(imap)
+
+// Deserialize
+// You have to create an IndexMap with primary index,
+// it's acceptable to add secondary index after deserializing
+imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
+    return value.ID
+}))
+err := json.Unmarshal(imapData, &imap)
+```
+
+### Iterate
+Like sync.Map, you can iterate the IndexMap with `Range()` method:
+```golang
+imap.Range(func(key int64, value *Person) bool {
+    fmt.Printf("key=%v, value=%+v\n", key, value)
+    return true
+})
+```
+
+An useful method to get all keys and values:
+```golang
+keys, values := imap.Collect()
 ```
 
 ## Performance

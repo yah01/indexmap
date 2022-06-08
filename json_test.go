@@ -61,10 +61,6 @@ func TestJsonUnmarshal(t *testing.T) {
 		3: {3, "Cassidy", "McCree"},
 	}
 
-	for _, v := range persons {
-		imap.Insert(v)
-	}
-
 	mapData, err := json.Marshal(persons)
 	assert.NoError(t, err)
 

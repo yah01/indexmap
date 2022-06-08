@@ -7,7 +7,7 @@ func (imap *IndexMap[K, V]) MarshalJSON() ([]byte, error) {
 }
 
 func (imap *IndexMap[K, V]) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &imap.primaryIndex); err != nil {
+	if err := json.Unmarshal(data, &imap.primaryIndex.inner); err != nil {
 		return err
 	}
 
