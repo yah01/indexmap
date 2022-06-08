@@ -1,6 +1,17 @@
 # IndexMap
 We often created a map with $ID \to Object$ to seek data, but this limits us to seek the data with only ID. to seek data with any field without SQL in database, IndexMap is the data structure you can reach this.
 
+## Installation
+To get the IndexMap package:
+```shell
+go get -u "github.com/yah01/indexmap"
+```
+
+Import the package:
+```golang
+import "github.com/yah01/indexmap"
+```
+
 ## Get Started
 First, to create a IndexMap with primary index:
 ```golang
@@ -129,6 +140,7 @@ Let $n$ be the number of elements inserted, $m$ be the number of indexes:
 | Get       | $O(1)$     |
 | GetBy     | $O(1)$     |
 | Insert    | $O(m)$     |
+| Update    | $O(m)$     |
 | Remove    | $O(m)$     |
 | AddIndex  | $O(n)$     |
 
