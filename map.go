@@ -75,6 +75,17 @@ func (imap *IndexMap[K, V]) GetAllBy(indexName string, key any) []*V {
 	return values.Collect()
 }
 
+// Return all values the seeked by the key,
+// nil if index or key not exists.
+func (imap *IndexMap[K, V]) GetAllByMulti(indexName string, key any) []*V {
+	values := imap.getAllBy(indexName, key)
+	if values == nil {
+		return nil
+	}
+
+	return values.Collect()
+}
+
 // Return true if the value with given key exists,
 // false otherwise.
 func (imap *IndexMap[K, V]) Contain(key K) bool {
