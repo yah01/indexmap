@@ -106,7 +106,7 @@ Search persons like Bob
 
 ### Update Value
 Inserting the different values with the same key works like the normal map type, the last one overwrites the others, but for a inserted value, modifing it outside may confuse the index, modify an internal value with `Update()/UpdateBy()`:
-```
+```golang
 DO NOT:
 person := persons.GetBy("name", "Ashe")
 person.City = "Shanghai"
