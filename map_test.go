@@ -26,15 +26,21 @@ func TestIndexMap(t *testing.T) {
 	}
 
 	for i := range persons {
+		assert.True(t, imap.Contain(persons[i].ID))
+
 		assert.Equal(t,
 			&persons[i], imap.Get(persons[i].ID))
 
 		assert.Equal(t,
 			&persons[i], imap.GetBy(NameIndex, persons[i].Name))
 
+		assert.Nil(t, imap.GetBy(InvalidIndex, persons[i].Name))
+
 		result := imap.GetAllBy(NameIndex, persons[i].Name)
 		assert.Equal(t, 1, len(result))
 		assert.Contains(t, result, &persons[i])
+
+		assert.Nil(t, imap.getAllBy(InvalidIndex, persons[i].Name))
 	}
 
 	// Add index after inserting data
@@ -55,6 +61,22 @@ func TestIndexMap(t *testing.T) {
 	assert.Nil(t, imap.Get(persons[0].ID))
 	assert.Nil(t, imap.GetBy(NameIndex, persons[0].Name))
 	assert.Empty(t, imap.GetAllBy(NameIndex, persons[0].Name))
+
+	// Update
+	imap.Insert(&persons[0])
+	imap.Update(persons[0].ID, func(value *Person) (*Person, bool) {
+		value.Name = "Tracer"
+		return value, true
+	})
+	assert.Equal(t, "Tracer", imap.Get(persons[0].ID).Name)
+
+	count := len(imap.GetAllBy(CityIndex, "Shanghai"))
+	imap.UpdateBy(CityIndex, "Shanghai", func(value *Person) (*Person, bool) {
+		value.City = "Beijing"
+		return value, true
+	})
+	assert.Empty(t, imap.GetAllBy(CityIndex, "Shanghai"))
+	assert.Equal(t, count, len(imap.GetAllBy(CityIndex, "Beijing")))
 }
 
 func TestAddExistedIndex(t *testing.T) {

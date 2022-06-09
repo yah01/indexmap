@@ -14,9 +14,10 @@ type Person struct {
 }
 
 const (
-	NameIndex = "name"
-	CityIndex = "city"
-	LikeIndex = "like"
+	InvalidIndex = "invalid"
+	NameIndex    = "name"
+	CityIndex    = "city"
+	LikeIndex    = "like"
 )
 
 func TestPrimaryIndex(t *testing.T) {
