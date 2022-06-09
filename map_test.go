@@ -77,6 +77,23 @@ func TestIndexMap(t *testing.T) {
 	})
 	assert.Empty(t, imap.GetAllBy(CityIndex, "Shanghai"))
 	assert.Equal(t, count, len(imap.GetAllBy(CityIndex, "Beijing")))
+
+	// Collect
+	keys, values := imap.Collect()
+	assert.Equal(t, imap.Len(), len(keys))
+	assert.Equal(t, imap.Len(), len(values))
+	for i := range keys {
+		assert.Equal(t, values[i], imap.Get(keys[i]))
+	}
+
+	// Range
+	count = 0
+	imap.Range(func(key int64, value *Person) bool {
+		count++
+		assert.Equal(t, value, imap.Get(key))
+		return true
+	})
+	assert.Equal(t, imap.Len(), count)
 }
 
 func TestAddExistedIndex(t *testing.T) {
