@@ -27,7 +27,7 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v -failfast -race -covermode=atomic -coverprofile=coverage.out ./...
+      run: go test -v -failfast -race -covermode=atomic -coverprofile=coverage.out .
       
     - name: Codecov
       # You may pin to the exact commit or the version.
