@@ -1,4 +1,6 @@
 # IndexMap
+[![codecov](https://codecov.io/gh/yah01/indexmap/branch/main/graph/badge.svg?token=REKAJVDILX)](https://codecov.io/gh/yah01/indexmap)
+
 We often created a map with $ID \to Object$ to seek data, but this limits us to seek the data with only ID. to seek data with any field without SQL in database, IndexMap is the data structure you can reach this.
 
 ## Installation
