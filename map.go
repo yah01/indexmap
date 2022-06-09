@@ -170,6 +170,19 @@ func (imap *IndexMap[K, V]) RemoveBy(indexName string, keys ...any) {
 	}
 }
 
+// Remove all values.
+func (imap *IndexMap[K, V]) Clear() {
+	for k := range imap.primaryIndex.inner {
+		delete(imap.primaryIndex.inner, k)
+	}
+
+	for i := range imap.indexes {
+		for k := range imap.indexes[i].inner {
+			delete(imap.indexes[i].inner, k)
+		}
+	}
+}
+
 // Iterate all the elements,
 // stop iteration if fn returns false,
 // no any guarantee to the order.
