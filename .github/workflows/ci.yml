@@ -1,4 +1,4 @@
-name: Go
+name: CI
 
 on:
   push:
@@ -22,14 +22,14 @@ jobs:
       # You may pin to the exact commit or the version.
       # uses: Mushus/golangci-linter@931bc5ccc973f10640a0feff55d49b12eddfa354
       uses: Mushus/golangci-linter@v1.1.2
-      
-    - name: Codecov
-      # You may pin to the exact commit or the version.
-      # uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
-      uses: codecov/codecov-action@v3.1.0
     
     - name: Build
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v -failfast -race -covermode=atomic -coverprofile=coverage.out ./...
+      
+    - name: Codecov
+      # You may pin to the exact commit or the version.
+      # uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378
+      uses: codecov/codecov-action@v3.1.0
