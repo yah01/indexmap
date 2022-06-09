@@ -8,11 +8,6 @@ import (
 )
 
 func TestJsonMarshal(t *testing.T) {
-	const (
-		NameIndex       = "name_index"
-		FormerNameIndex = "former_name_index"
-	)
-
 	imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
 		return value.ID
 	}))
@@ -22,9 +17,9 @@ func TestJsonMarshal(t *testing.T) {
 	}))
 
 	persons := map[int64]*Person{
-		1: {1, "Ashe", "ashe"},
-		2: {2, "Bob", "bob"},
-		3: {3, "Cassidy", "McCree"},
+		1: {1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
+		2: {2, "Bob", 18, "San Francisco", nil},
+		3: {3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
 	}
 
 	for _, v := range persons {
@@ -42,11 +37,6 @@ func TestJsonMarshal(t *testing.T) {
 }
 
 func TestJsonUnmarshal(t *testing.T) {
-	const (
-		NameIndex       = "name_index"
-		FormerNameIndex = "former_name_index"
-	)
-
 	imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
 		return value.ID
 	}))
@@ -56,9 +46,9 @@ func TestJsonUnmarshal(t *testing.T) {
 	}))
 
 	persons := map[int64]*Person{
-		1: {1, "Ashe", "ashe"},
-		2: {2, "Bob", "bob"},
-		3: {3, "Cassidy", "McCree"},
+		1: {1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
+		2: {2, "Bob", 18, "San Francisco", nil},
+		3: {3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
 	}
 
 	mapData, err := json.Marshal(persons)
@@ -80,16 +70,17 @@ func TestJsonUnmarshal(t *testing.T) {
 	}
 
 	// Add index after inserting data
-	imap.AddIndex(FormerNameIndex, NewSecondaryIndex(func(value *Person) []any {
-		return []any{value.FormerName}
+	imap.AddIndex(CityIndex, NewSecondaryIndex(func(value *Person) []any {
+		return []any{value.City}
 	}))
 
-	for i := range persons {
-		assert.Equal(t,
-			persons[i], imap.GetBy(FormerNameIndex, persons[i].FormerName))
-
-		result := imap.GetAllBy(FormerNameIndex, persons[i].FormerName)
-		assert.Equal(t, 1, len(result))
-		assert.Contains(t, result, persons[i])
+	for id := range persons {
+		assert.Contains(t,
+			imap.GetAllBy(CityIndex, persons[id].City), persons[id])
 	}
+
+	// Mock JSON with syntax error
+	mapData = append(mapData, '}')
+	err = json.Unmarshal(mapData, imap)
+	assert.Error(t, err)
 }
