@@ -6,10 +6,18 @@ import (
 )
 
 type Person struct {
-	ID         int64
-	Name       string
-	FormerName string
+	ID   int64
+	Name string
+	Age  int
+	City string
+	Like []string
 }
+
+const (
+	NameIndex = "name"
+	CityIndex = "city"
+	LikeIndex = "like"
+)
 
 func TestPrimaryIndex(t *testing.T) {
 	index := NewPrimaryIndex(func(value *Person) int64 {
@@ -17,9 +25,9 @@ func TestPrimaryIndex(t *testing.T) {
 	})
 
 	persons := []Person{
-		{1, "Ashe", "ashe"},
-		{2, "Bob", "bob"},
-		{3, "Cassidy", "McCree"},
+		{1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
+		{2, "Bob", 18, "San Francisco", nil},
+		{3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
 	}
 
 	for i := range persons {
@@ -32,7 +40,7 @@ func TestPrimaryIndex(t *testing.T) {
 	}
 
 	// Insert overwrite
-	overwritePerson := &Person{1, "Tracer", "tracer"}
+	overwritePerson := &Person{1, "Tracer", 23, "London", []string{"Bob"}}
 	index.insert(overwritePerson)
 	assert.Equal(t, overwritePerson, index.get(overwritePerson.ID))
 
@@ -44,13 +52,13 @@ func TestPrimaryIndex(t *testing.T) {
 func TestSecondaryIndex(t *testing.T) {
 	// Many-to-One index
 	index := NewSecondaryIndex(func(value *Person) []any {
-		return []any{value.Name, value.FormerName}
+		return []any{value.Name, value.City}
 	})
 
 	persons := []Person{
-		{1, "Ashe", "ashe"},
-		{2, "Bob", "bob"},
-		{3, "Cassidy", "McCree"},
+		{1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
+		{2, "Bob", 18, "San Francisco", nil},
+		{3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
 	}
 
 	for i := range persons {
@@ -64,34 +72,23 @@ func TestSecondaryIndex(t *testing.T) {
 		assert.Contains(t,
 			result, &persons[i])
 
-		result = index.get(persons[i].FormerName)
-
-		assert.Equal(t, 1, len(result))
+		result = index.get(persons[i].City)
 		assert.Contains(t,
 			result, &persons[i])
 	}
 
 	// Insert makes One-to-Many, Many-to-Many
-	overwritePerson := &Person{4, "Ashe", "alice"}
-	index.insert(overwritePerson)
+	ashe2 := &Person{4, "Ashe", 83, "Chengdu", nil}
+	index.insert(ashe2)
 
-	result := index.get(overwritePerson.Name)
+	result := index.get(ashe2.Name)
 	assert.Equal(t, 2, len(result))
-	assert.Contains(t, result, overwritePerson)
+	assert.Contains(t, result, ashe2)
 	assert.Contains(t, result, &persons[0])
-	result = index.get(overwritePerson.FormerName)
-
-	assert.Equal(t, 1, len(result))
-	assert.Contains(t,
-		result, overwritePerson)
 
 	// Remove
-	index.remove(overwritePerson)
+	index.remove(ashe2)
 	result = index.get(persons[0].Name)
-	assert.Equal(t, 1, len(result))
-	assert.Contains(t, result, &persons[0])
-
-	result = index.get(persons[0].FormerName)
 	assert.Equal(t, 1, len(result))
 	assert.Contains(t, result, &persons[0])
 }
