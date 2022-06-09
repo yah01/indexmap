@@ -6,39 +6,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Person struct {
-	ID   int64
-	Name string
-	Age  int
-	City string
-	Like []string
-}
-
-const (
-	InvalidIndex = "invalid"
-	NameIndex    = "name"
-	CityIndex    = "city"
-	LikeIndex    = "like"
-)
-
 func TestPrimaryIndex(t *testing.T) {
 	index := NewPrimaryIndex(func(value *Person) int64 {
 		return value.ID
 	})
 
-	persons := []Person{
-		{1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
-		{2, "Bob", 18, "San Francisco", nil},
-		{3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
+	persons := GenPersons()
+
+	for _, person := range persons {
+		index.insert(person)
 	}
 
-	for i := range persons {
-		index.insert(&persons[i])
-	}
-
-	for i := range persons {
+	for _, person := range persons {
 		assert.Equal(t,
-			&persons[i], index.get(persons[i].ID))
+			person, index.get(person.ID))
 	}
 
 	// Insert overwrite
@@ -57,26 +38,22 @@ func TestSecondaryIndex(t *testing.T) {
 		return []any{value.Name, value.City}
 	})
 
-	persons := []Person{
-		{1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
-		{2, "Bob", 18, "San Francisco", nil},
-		{3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
+	persons := GenPersons()
+
+	for _, person := range persons {
+		index.insert(person)
 	}
 
-	for i := range persons {
-		index.insert(&persons[i])
-	}
-
-	for i := range persons {
-		result := index.get(persons[i].Name)
+	for _, person := range persons {
+		result := index.get(person.Name)
 
 		assert.Equal(t, 1, len(result))
 		assert.Contains(t,
-			result, &persons[i])
+			result, person)
 
-		result = index.get(persons[i].City)
+		result = index.get(person.City)
 		assert.Contains(t,
-			result, &persons[i])
+			result, person)
 	}
 
 	// Insert makes One-to-Many, Many-to-Many
@@ -86,11 +63,11 @@ func TestSecondaryIndex(t *testing.T) {
 	result := index.get(ashe2.Name)
 	assert.Equal(t, 2, len(result))
 	assert.Contains(t, result, ashe2)
-	assert.Contains(t, result, &persons[0])
+	assert.Contains(t, result, persons[0])
 
 	// Remove
 	index.remove(ashe2)
 	result = index.get(persons[0].Name)
 	assert.Equal(t, 1, len(result))
-	assert.Contains(t, result, &persons[0])
+	assert.Contains(t, result, persons[0])
 }

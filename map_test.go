@@ -11,49 +11,44 @@ func TestIndexMap(t *testing.T) {
 		return value.ID
 	}))
 
-	imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
+	ok := imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
 		return []any{value.Name}
 	}))
+	assert.True(t, ok)
 
-	persons := []Person{
-		{1, "Ashe", 38, "San Francisco", []string{"Bob", "Cassidy"}},
-		{2, "Bob", 18, "San Francisco", nil},
-		{3, "Cassidy", 40, "Shanghai", []string{"Bob", "Ashe"}},
-	}
+	persons := GenPersons()
+	InsertData(imap, persons)
 
-	for i := range persons {
-		imap.Insert(&persons[i])
-	}
-
-	for i := range persons {
-		assert.True(t, imap.Contain(persons[i].ID))
+	for _, person := range persons {
+		assert.True(t, imap.Contain(person.ID))
 
 		assert.Equal(t,
-			&persons[i], imap.Get(persons[i].ID))
+			person, imap.Get(person.ID))
 
 		assert.Equal(t,
-			&persons[i], imap.GetBy(NameIndex, persons[i].Name))
+			person, imap.GetBy(NameIndex, person.Name))
 
-		assert.Nil(t, imap.GetBy(InvalidIndex, persons[i].Name))
+		assert.Nil(t, imap.GetBy(InvalidIndex, person.Name))
 
-		result := imap.GetAllBy(NameIndex, persons[i].Name)
+		result := imap.GetAllBy(NameIndex, person.Name)
 		assert.Equal(t, 1, len(result))
-		assert.Contains(t, result, &persons[i])
+		assert.Contains(t, result, person)
 
-		assert.Nil(t, imap.getAllBy(InvalidIndex, persons[i].Name))
+		assert.Nil(t, imap.getAllBy(InvalidIndex, person.Name))
 	}
 
 	// Add index after inserting data
-	imap.AddIndex(CityIndex, NewSecondaryIndex(func(value *Person) []any {
+	ok = imap.AddIndex(CityIndex, NewSecondaryIndex(func(value *Person) []any {
 		return []any{value.City}
 	}))
+	assert.True(t, ok)
 
-	for i := range persons {
+	for _, person := range persons {
 		assert.Equal(t,
-			&persons[i], imap.GetBy(NameIndex, persons[i].Name))
+			person, imap.GetBy(NameIndex, person.Name))
 
-		result := imap.GetAllBy(CityIndex, persons[i].City)
-		assert.Contains(t, result, &persons[i])
+		result := imap.GetAllBy(CityIndex, person.City)
+		assert.Contains(t, result, person)
 	}
 
 	// Remove
@@ -63,7 +58,8 @@ func TestIndexMap(t *testing.T) {
 	assert.Empty(t, imap.GetAllBy(NameIndex, persons[0].Name))
 
 	// Update
-	imap.Insert(&persons[0])
+	imap.Clear()
+	InsertData(imap, persons)
 	imap.Update(persons[0].ID, func(value *Person) (*Person, bool) {
 		value.Name = "Tracer"
 		return value, true
@@ -101,13 +97,13 @@ func TestAddExistedIndex(t *testing.T) {
 		return value.ID
 	}))
 
-	imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
+	ok := imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
 		return []any{value.Name}
 	}))
+	assert.True(t, ok)
 
-	ok := imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
+	ok = imap.AddIndex(NameIndex, NewSecondaryIndex(func(value *Person) []any {
 		return []any{value.City}
 	}))
-
 	assert.False(t, ok)
 }
