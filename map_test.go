@@ -57,6 +57,10 @@ func TestIndexMap(t *testing.T) {
 	assert.Nil(t, imap.GetBy(NameIndex, persons[0].Name))
 	assert.Empty(t, imap.GetAllBy(NameIndex, persons[0].Name))
 
+	imap.RemoveBy(CityIndex, "San Francisco")
+	assert.Empty(t, imap.GetAllBy(CityIndex, "San Francisco"))
+	assert.Equal(t, 1, len(imap.GetAllBy(CityIndex, "Shanghai")))
+
 	// Update
 	imap.Clear()
 	InsertData(imap, persons)
