@@ -123,16 +123,16 @@ func (imap *IndexMap[K, V]) Update(key K, updateFn UpdateFn[V]) {
 // it removes the old ones if exist, and inserts updateFn(old) for every old ones if not nil.
 // NOTE: the modified values have to be with unique primary key
 func (imap *IndexMap[K, V]) UpdateBy(indexName string, key any, updateFn UpdateFn[V]) {
-	oldValues := imap.getAllBy(indexName, key)
-	if len(oldValues) == 0 {
+	oldValueSet := imap.getAllBy(indexName, key)
+	if len(oldValueSet) == 0 {
 		return
 	}
 
-	imap.removeValueSet(oldValues)
+	oldValues := oldValueSet.Collect()
 
-	for old := range oldValues {
-		imap.Remove(imap.primaryIndex.extractField(old))
+	imap.removeValues(oldValues...)
 
+	for _, old := range oldValues {
 		new, modified := updateFn(old)
 		if modified && new != nil {
 			imap.Insert(new)
