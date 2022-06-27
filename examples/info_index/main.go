@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/yah01/indexmap"
+	"github.com/haraldLmueller/indexmap"
 )
 
 type Person struct {

@@ -1,17 +1,19 @@
 # IndexMap
-[![codecov](https://codecov.io/gh/yah01/indexmap/branch/main/graph/badge.svg?token=REKAJVDILX)](https://codecov.io/gh/yah01/indexmap)
+
+This is a fork of github.com/yah01/indexmap. So many thanks to yah01 from Shanghai.  
+While the base from yah01 is working very well, we need that fully thread safe and that was extend by Harald Mueller.
 
 We often created a map with $ID \to Object$ to seek data, but this limits us to seek the data with only ID. to seek data with any field without SQL in database, IndexMap is the data structure you can reach this.
 
 ## Installation
 To get the IndexMap package:
 ```shell
-go get -u "github.com/yah01/indexmap"
+go get -u "github.com/haraldLmueller/indexmap"
 ```
 
 Import the package:
 ```golang
-import "github.com/yah01/indexmap"
+import "github.com/haraldLmueller/indexmap"
 ```
 
 ## Get Started
@@ -115,7 +117,7 @@ Search persons like Bob
 ```
 
 ## Document
-[API Reference](https://pkg.go.dev/github.com/yah01/indexmap)
+[API Reference](https://pkg.go.dev/github.com/haraldLmueller/indexmap)
 
 ### Update Value
 Inserting the different values with the same key works like the normal map type, the last one overwrites the others, but for a inserted value, modifing it outside may confuse the index, modify an internal value with `Update()/UpdateBy()`:

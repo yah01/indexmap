@@ -1,8 +1,5 @@
 package indexmap
 
-import (
-	"github.com/yah01/container"
-)
 
 type PrimaryIndex[K comparable, V any] struct {
 	extractField func(value *V) K
@@ -40,7 +37,7 @@ func (index *PrimaryIndex[K, V]) iterate(handler func(key K, value *V)) {
 type SecondaryIndex[V any] struct {
 	extractField func(value *V) []any
 
-	inner map[any]container.Set[*V]
+	inner map[any]Set[*V]
 }
 
 // Create a secondary index,
@@ -49,11 +46,11 @@ type SecondaryIndex[V any] struct {
 func NewSecondaryIndex[V any](extractField func(value *V) []any) *SecondaryIndex[V] {
 	return &SecondaryIndex[V]{
 		extractField: extractField,
-		inner:        make(map[any]container.Set[*V]),
+		inner:        make(map[any]Set[*V]),
 	}
 }
 
-func (index *SecondaryIndex[V]) get(key any) container.Set[*V] {
+func (index *SecondaryIndex[V]) get(key any) Set[*V] {
 	set, ok := index.inner[key]
 	if !ok {
 		return nil
@@ -67,7 +64,7 @@ func (index *SecondaryIndex[V]) insert(elem *V) {
 	for i := range keys {
 		elems, ok := index.inner[keys[i]]
 		if !ok {
-			elems = make(container.Set[*V])
+			elems = make(Set[*V])
 			index.inner[keys[i]] = elems
 		}
 

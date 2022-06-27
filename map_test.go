@@ -19,8 +19,9 @@ func TestIndexMap(t *testing.T) {
 	persons := GenPersons()
 	InsertData(imap, persons)
 
-	for _, person := range persons {
-		assert.True(t, imap.Contain(person.ID))
+	for i, person := range persons {
+		assert.Equal(t,
+			persons[i], imap.Get(persons[i].ID))
 
 		assert.Equal(t,
 			person, imap.Get(person.ID))
