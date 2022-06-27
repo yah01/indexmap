@@ -1,6 +1,9 @@
 package indexmap
 
 import (
+	"math/rand"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -111,4 +114,78 @@ func TestAddExistedIndex(t *testing.T) {
 		return []any{value.City}
 	}))
 	assert.False(t, ok)
+}
+
+func BenchmarkInsertOnlyPrimaryInt(b *testing.B) {
+	n := len(names)
+	rand.Seed(123)
+	imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
+		return value.ID
+	}))
+	for i := 0; i < b.N; i++ {
+		pi := int64(i)
+		imap.Insert(&Person{pi, names[i%n], rand.Intn(106), "city", nil})
+		r := imap.Get(pi)
+		assert.Equal(b, pi, r.ID)
+	}
+}
+
+func BenchmarkParallelInsertMonlyPrimaryInt(b *testing.B) {
+	n := int64(len(names))
+	rand.Seed(123)
+	var i int64
+	imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
+		return value.ID
+	}))
+	b.RunParallel(func(pb *testing.PB) {
+		age := rand.Intn(106)
+		for pb.Next() {
+			atomic.AddInt64(&i, 1)
+			pi := i
+			imap.Insert(&Person{pi, names[i%n], age, "city", nil})
+			r := imap.Get(pi)
+			assert.Equal(b, pi, r.ID)
+		}
+	})
+}
+
+func BenchmarkNativeMap(b *testing.B) {
+	n := len(names)
+	rand.Seed(123)
+	imap := make(map[int64]*Person)
+	for i := 0; i < b.N; i++ {
+		pi := int64(i)
+		imap[pi] = (&Person{pi, names[i%n], 10, "city", nil})
+		r := imap[pi]
+		assert.Equal(b, pi, r.ID)
+	}
+}
+
+func BenchmarkNativeSyncMap(b *testing.B) {
+	n := len(names)
+	rand.Seed(123)
+	var imap sync.Map
+	age := rand.Intn(106)
+	for i := 0; i < b.N; i++ {
+		pi := int64(i)
+		imap.Store(pi, &Person{pi, names[i%n], age, "city", nil})
+		r, _ := imap.Load(pi)
+		assert.Equal(b, pi, (r.(*Person)).ID)
+	}
+}
+func BenchmarkParallelNativeSyncMap(b *testing.B) {
+	n := int64(len(names))
+	rand.Seed(123)
+	var i int64
+	var imap sync.Map
+	b.RunParallel(func(pb *testing.PB) {
+		age := rand.Intn(106)
+		for pb.Next() {
+			atomic.AddInt64(&i, 1)
+			pi := i
+			imap.Store(pi, &Person{pi, names[i%n], age, "city", nil})
+			r, _ := imap.Load(pi)
+			assert.Equal(b, pi, (r.(*Person)).ID)
+		}
+	})
 }
