@@ -1,6 +1,7 @@
 package indexmap
 
 import (
+	"fmt"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -187,5 +188,25 @@ func BenchmarkParallelNativeSyncMap(b *testing.B) {
 			r, _ := imap.Load(pi)
 			assert.Equal(b, pi, (r.(*Person)).ID)
 		}
+	})
+}
+
+func FuzzAddSecondaryIndex(f *testing.F) {
+	var i int64
+	imap := NewIndexMap(NewPrimaryIndex(func(value *Person) int64 {
+		return value.ID
+	}))
+	imap.AddIndex("name", NewSecondaryIndex(func(value *Person) []any {
+		return []any{value.Name}
+	}))
+	f.Add("John", "Doh", 34)
+	f.Fuzz(func(t *testing.T, first string, city string, age int) {
+		atomic.AddInt64(&i, 1)
+		uniqName := fmt.Sprintf("%s-%d",first,i)
+		pi := i
+		imap.Insert(&Person{pi, uniqName, age, city, nil})
+		ret := imap.GetAllBy("name", uniqName)
+		assert.Equal(t, pi, ret[0].ID)
+		assert.Equal(t, uniqName, ret[0].Name)
 	})
 }
